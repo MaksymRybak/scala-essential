@@ -4,6 +4,7 @@ import scala.collection.immutable.ArraySeq
 import java.util.Date
 import java.util.Calendar
 import scala.util.Try
+import scala.util.matching.Regex
 
 object HelloScala extends App {
     println("Hello Scala")
@@ -60,6 +61,79 @@ object HelloScala extends App {
     println(Dad.rate(f1))
     println(Dad.rate(f2))
     println(Dad.rate(f3))
+
+    // extractors
+    val r = new Regex("""(\d+)\.(\d+)\.(\d+)\.(\d+)""")
+    val extracted = "192.168.0.1" match {
+        case r(a, b, c, d) => List(a, b, c, d)      // pattern that binds each of the captured groups
+    }
+    println(s"extracted: $extracted")
+
+    val l = Nil
+    val l1 = List(1,2,3)
+    println( 
+        l1 match {
+            case List(a) => "length 1"
+            //case ::(head, tail) => s"head $head tail $tail"    //  binary extractor pattern
+            case head :: tail => s"head $head tail $tail"        //  binary extractor pattern can also be written infix
+            case Nil => "length 0"
+        }
+    )
+    // Combined use of ::, Nil, and _ allow us to match the first elements of any length of list
+    List(1, 2, 3) match {
+        case Nil => "length 0"
+        case a :: Nil => s"length 1 starting $a"
+        case a :: b :: Nil => s"length 2 starting $a $b"
+        case a :: b :: c :: _ => s"length 3+ starting $a $b $c"
+    }
+
+    println("rybak.maksym@gmail.com" match { case Email(user, domain) => s"extracted from email: $user at $domain"})
+    println("hello world" match { case Uppercase(s) => s })
+    Person("Dave", "Gurnell", 30) match {
+        case Person(f, Uppercase(l), _) => s"$f $l"
+        case _ => "unknown person"
+    }
+
+    assert(
+        "No" == 
+            (0 match {
+                    case Positive(_) => "Yes"
+                    case _ => "No"
+            })
+    )
+
+    assert(
+        "Yes" ==
+            (42 match {
+                case Positive(_) => "Yes"
+                case _ => "No"
+            })
+    )
+
+    assert(
+        "Sir Lord Doctor David Gurnell" ==
+            ("sir lord doctor david gurnell" match {
+                case Titlecase(str) => str
+            })
+    )
+
+    "the quick brown fox" match {
+        case Words(a, b, c) => s"3 words: $a $b $c"
+        case Words(a, b, c, d) => s"4 words: $a $b $c $d"       // this case will match 
+    }
+
+    List(1, 2, 3, 4, 5) match {
+        case List(a, b, _*) => a + b    // The wildcard sequence pattern, written _*, matches zero or more arguments from a variable-length pattern and discards their values
+    }
+
+    "the quick brown fox" match {
+        case Words(a, b, _*) => a + b   // we don't have access to remaining elements
+    }
+
+    "the quick brown fox" match {
+        case Words(a, b, rest @ _*) => println(rest)     // we can access remaining elements using rest 
+    }
+    //println("--------------")
 
     // traits
     def older(v1: Visitor, v2: Visitor) = v1.createdAt.before(v2.createdAt)
