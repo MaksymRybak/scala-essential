@@ -1,0 +1,1 @@
+case class PairBox[A,B](one: A, two: B) {}
