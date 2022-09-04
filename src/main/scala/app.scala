@@ -124,6 +124,7 @@ object HelloScala extends App {
 
     List(1, 2, 3, 4, 5) match {
         case List(a, b, _*) => a + b    // The wildcard sequence pattern, written _*, matches zero or more arguments from a variable-length pattern and discards their values
+        case _ => 0
     }
 
     "the quick brown fox" match {
@@ -496,6 +497,38 @@ object HelloScala extends App {
     }
 
     println(foldLeftMutable[Int, Int](Seq(1,2,3), 0, (a,b) => a + b))
+
+    // streams (element in single position is computed when accessed)
+    val stream1 = Stream(1, 2, 3)
+    val stream2 = 1 #:: 2 #:: 3 #:: Stream.empty
+    def streamOnes: Stream[Int] = 1 #:: streamOnes  // infinite stream of 1s
+    // Because elements are only evaluated as requested, calling streamOnes doesn’t lead to infinte recursion
+    streamOnes.take(5).toList
+
+    // Vectors are a good choice if you want both random access and immutability
+    val iseq = scala.collection.immutable.IndexedSeq(1, 2, 3)
+
+    // Mutable collections
+    val buffer = new scala.collection.mutable.ArrayBuffer[Int]()    // buffer
+    buffer += 1
+
+    // StringBuilder (like in java, it's a buffer for building strings)
+
+    // LinkedList (LinkedLists and DoubleLinkedLists)
+
+    // View
+    // full sequence of transformations on an element-by-element basis (intermediate collections are avoided)
+    val view = Seq(1, 2, 3).view.map(_ * 2).map(_ + 4).map(_.toString)
+    println(view.force) // Any traversals of a view are only applied when the force method is called.
+
+    // NB: For very large collections of items with many stages of transformations a view can be worthwhile. For modest sizes views are usually slower than creating the intermediate data structures
+
+    val mutable = scala.collection.mutable.Seq(1, 2, 3)
+    mutable.update(0, 5)
+    mutable(1) = 7  // assignment operator syntax
+
+    // Methods defined on both mutable and immutable sequences will never perform destructive updates. For example, :+ always returns a new copy of the sequence without updating the original:
+    val newMutable = mutable :+ 4
 
     // for comprehensions
     val newSeq = for {
